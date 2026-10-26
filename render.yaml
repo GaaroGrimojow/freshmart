@@ -1,0 +1,31 @@
+# Render Blueprint Specification for FreshMart
+# Deploys:
+# 1. Managed PostgreSQL database
+# 2. Unified Node.js Express Web Service (Storefront + REST API)
+version: "1"
+
+databases:
+  - name: freshmart-db
+    # Note: 'starter' ($7/mo) provides continuous persistent storage without 30-day expiration.
+    # Set to 'free' if evaluating on Render's 30-day free tier.
+    plan: starter
+    databaseName: freshmart_db
+    user: freshmart_user
+
+services:
+  - type: web
+    name: freshmart-store
+    runtime: node
+    # Note: 'starter' ($7/mo) ensures 24/7 continuous availability with ZERO spin-down.
+    # Set to 'free' if evaluating with spin-down on inactivity.
+    plan: starter
+    buildCommand: npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: freshmart-db
+          property: connectionString

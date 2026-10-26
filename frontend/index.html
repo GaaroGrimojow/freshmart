@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FreshMart — Farm Fresh Groceries & Daily Essentials</title>
+  <meta name="description" content="Shop farm-fresh vegetables, organic fruits, dairy, and daily staples at best prices in India. 30-minute express doorstep delivery.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- System Status Banner (shows database & backend connectivity) -->
+  <div id="system-banner" class="system-banner checking">
+    <div class="banner-inner">
+      <span class="status-indicator" id="status-indicator"></span>
+      <span id="banner-text">Connecting to FreshMart PostgreSQL backend...</span>
+      <button id="banner-btn" class="banner-action-btn" onclick="checkBackendHealth()">Check Status</button>
+    </div>
+  </div>
+
+  <!-- Announcement Bar -->
+  <div class="top-announcement">
+    <div class="announcement-content">
+      <span>⚡ <strong>Express 30-Min Delivery</strong> in your area</span>
+      <span class="sep">•</span>
+      <span>🌿 100% Farm Fresh & Pure Ingredients</span>
+      <span class="sep">•</span>
+      <span>🎉 Use coupon <strong>FRESH50</strong> for ₹50 off on first order</span>
+    </div>
+  </div>
+
+  <!-- Navigation Bar -->
+  <header class="main-header" id="main-header">
+    <div class="header-container">
+      <!-- Logo -->
+      <a href="#" class="brand-logo" id="brand-logo">
+        <div class="logo-icon">🌿</div>
+        <div class="logo-text">
+          <span class="logo-title">Fresh<span>Mart</span></span>
+          <span class="logo-subtitle">Daily Grocery & Essentials</span>
+        </div>
+      </a>
+
+      <!-- Location Selector -->
+      <div class="location-badge" id="location-badge">
+        <div class="loc-pin">📍</div>
+        <div class="loc-info">
+          <span class="loc-label">Delivering to</span>
+          <span class="loc-val">Bengaluru, 560001 ▾</span>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input 
+          type="text" 
+          id="search-input" 
+          placeholder="Search for 'Mangoes', 'Milk', 'Basmati Rice', 'Dal'..." 
+          autocomplete="off"
+        >
+        <button id="clear-search-btn" class="clear-search-btn" style="display:none;" title="Clear search">✕</button>
+        <div class="search-dropdown" id="search-dropdown" style="display:none;"></div>
+      </div>
+
+      <!-- Header Actions -->
+      <div class="header-actions">
+        <button class="nav-btn" id="reports-nav-btn" title="View Business Reports from Python Service">
+          <span class="btn-icon">📊</span>
+          <span class="btn-label">Reports</span>
+        </button>
+
+        <button class="cart-trigger-btn" id="cart-trigger-btn" aria-label="Open Shopping Cart">
+          <span class="cart-icon">🛒</span>
+          <span class="cart-counter" id="cart-counter">0</span>
+          <div class="cart-preview-amount">
+            <span class="cart-subtotal-label">My Cart</span>
+            <span class="cart-subtotal-val" id="cart-total-badge">₹0.00</span>
+          </div>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Banner -->
+  <section class="hero-section">
+    <div class="hero-content">
+      <div class="hero-tag">🌾 Direct From Indian Farmers</div>
+      <h1 class="hero-title">Farm Fresh Groceries Delivered In <span>30 Minutes</span></h1>
+      <p class="hero-description">
+        Experience hand-picked seasonal fruits, fresh vegetables, dairy, and pure grains delivered with hygiene and care at honest Indian prices.
+      </p>
+      <div class="hero-badges">
+        <div class="badge-item">
+          <span class="badge-icon">🚚</span>
+          <span>Free delivery above ₹499</span>
+        </div>
+        <div class="badge-item">
+          <span class="badge-icon">🏷️</span>
+          <span>Lowest price guarantee</span>
+        </div>
+        <div class="badge-item">
+          <span class="badge-icon">🛡️</span>
+          <span>Cash on delivery / UPI</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Flash Deals & Savings Bar -->
+  <section class="deals-ticker-section">
+    <div class="section-container deals-banner-wrap">
+      <div class="deals-banner-left">
+        <span class="deal-tag">⚡ FLASH SALE</span>
+        <span class="deal-text">Get <strong>₹50 OFF</strong> on your first grocery delivery! Apply promo code <span class="promo-badge-inline">FRESH50</span></span>
+      </div>
+      <div class="deals-countdown">
+        <span class="timer-label">Offer expires in:</span>
+        <div class="timer-box" id="timer-box">
+          <span class="time-part" id="timer-h">02</span>h : <span class="time-part" id="timer-m">44</span>m : <span class="time-part" id="timer-s">18</span>s
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Interactive Visual Category Grid / Carousel -->
+  <section class="featured-categories-section">
+    <div class="section-container">
+      <div class="featured-categories-header">
+        <div>
+          <h2 class="featured-title">Explore Fresh Categories</h2>
+          <p class="featured-subtitle">Browse farm produce, bakery, dairy and pantry staples with live inventory</p>
+        </div>
+        <div class="category-scroll-arrows">
+          <button class="arrow-btn" id="scroll-cat-left" aria-label="Scroll left" onclick="scrollCategories(-280)">‹</button>
+          <button class="arrow-btn" id="scroll-cat-right" aria-label="Scroll right" onclick="scrollCategories(280)">›</button>
+        </div>
+      </div>
+      <div class="featured-categories-track" id="featured-categories-track">
+        <!-- Rendered dynamically via JavaScript with vibrant images, counters, and smooth interactive click -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Quick Category Pills Sticky Bar -->
+  <section class="category-section" id="category-pills-bar">
+    <div class="section-container">
+      <div class="category-chips-wrapper" id="category-chips">
+        <!-- Dynamic chips generated from PostgreSQL categories -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Main Section -->
+  <main class="products-section">
+    <div class="section-container">
+      <!-- Toolbar -->
+      <div class="catalog-toolbar">
+        <div class="catalog-info">
+          <h2 class="section-title" id="catalog-title">All Groceries</h2>
+          <span class="items-count-badge" id="items-count-badge">Loading items...</span>
+        </div>
+
+        <div class="catalog-filters">
+          <label for="sort-select" class="sort-label">Sort by:</label>
+          <select id="sort-select" class="sort-select">
+            <option value="default">Featured Items</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="rating_desc">Highest Rated</option>
+            <option value="name_asc">Name: A to Z</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Product Cards Grid -->
+      <div class="products-grid" id="products-grid">
+        <!-- Rendered dynamically by JavaScript -->
+      </div>
+
+      <!-- Empty State -->
+      <div class="empty-products" id="empty-products" style="display: none;">
+        <div class="empty-icon">🥬</div>
+        <h3>No matching grocery items found</h3>
+        <p>Try searching for a different keyword or browse through our categories.</p>
+        <button class="primary-btn" onclick="resetFilters()">View All Items</button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Value Propositions / Footer Features -->
+  <section class="trust-features">
+    <div class="section-container features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚡</div>
+        <h4>Express 30-Min Delivery</h4>
+        <p>Superfast delivery from local dark stores directly to your kitchen.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🌱</div>
+        <h4>100% Quality Guarantee</h4>
+        <p>Every vegetable and fruit is inspected and sanitized before packing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">₹</div>
+        <h4>Honest Indian Prices</h4>
+        <p>Save more on daily essentials with genuine wholesale discounts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔄</div>
+        <h4>No-Questions Returns</h4>
+        <p>Not satisfied with any item? Instant replacement or refund at delivery.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Shopping Cart Slide-out Drawer -->
+  <div class="cart-backdrop" id="cart-backdrop"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Shopping Cart">
+    <div class="cart-drawer-header">
+      <div class="cart-header-title">
+        <h3>Your Shopping Basket</h3>
+        <span class="cart-item-count" id="drawer-item-count">0 items</span>
+      </div>
+      <button class="close-drawer-btn" id="close-cart-btn" aria-label="Close Cart">✕</button>
+    </div>
+
+    <!-- Free Delivery Meter -->
+    <div class="delivery-meter-box" id="delivery-meter-box">
+      <div class="meter-text" id="meter-text">Add ₹499 more for <strong>FREE Delivery</strong></div>
+      <div class="meter-bar">
+        <div class="meter-fill" id="meter-fill" style="width: 0%;"></div>
+      </div>
+    </div>
+
+    <!-- Cart Items List -->
+    <div class="cart-items-list" id="cart-items-list">
+      <!-- Populated via JavaScript -->
+    </div>
+
+    <!-- Cart Footer with Pricing & Checkout -->
+    <div class="cart-drawer-footer" id="cart-drawer-footer">
+      <!-- Promo Code Box -->
+      <div class="coupon-box">
+        <input type="text" id="coupon-input" placeholder="Enter coupon code (FRESH50)" uppercase>
+        <button id="apply-coupon-btn" class="apply-coupon-btn">Apply</button>
+      </div>
+      <div id="coupon-message" class="coupon-message"></div>
+
+      <!-- Bill Breakdown -->
+      <div class="bill-summary">
+        <div class="bill-row">
+          <span>Items Subtotal</span>
+          <span id="bill-subtotal">₹0.00</span>
+        </div>
+        <div class="bill-row" id="discount-row" style="display: none;">
+          <span class="discount-text">Coupon Discount (FRESH50)</span>
+          <span class="discount-text" id="bill-discount">-₹50.00</span>
+        </div>
+        <div class="bill-row">
+          <span>Delivery Partner Fee</span>
+          <span id="bill-delivery">₹40.00</span>
+        </div>
+        <div class="bill-row total-row">
+          <span>To Pay</span>
+          <span class="final-total" id="bill-total">₹0.00</span>
+        </div>
+      </div>
+
+      <button class="checkout-cta-btn" id="checkout-cta-btn">
+        <span>Proceed to Checkout</span>
+        <span id="cta-total-badge">₹0.00 →</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Checkout Modal -->
+  <div class="modal-backdrop" id="checkout-backdrop"></div>
+  <div class="checkout-modal" id="checkout-modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <h3>Complete Your Grocery Order</h3>
+        <span class="modal-subtitle">Fresh delivery directly to your home address</span>
+      </div>
+      <button class="close-modal-btn" id="close-checkout-btn">✕</button>
+    </div>
+
+    <form id="checkout-form" class="checkout-form">
+      <div class="form-sections">
+        <!-- Contact Details -->
+        <div class="form-section">
+          <h4 class="form-section-title">1. Customer Contact</h4>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="cust-name">Full Name *</label>
+              <input type="text" id="cust-name" required placeholder="e.g. Ramesh Kumar">
+            </div>
+            <div class="form-group">
+              <label for="cust-phone">Mobile Phone (10-digits) *</label>
+              <input type="tel" id="cust-phone" required pattern="[0-9]{10}" placeholder="9876543210">
+            </div>
+            <div class="form-group full-width">
+              <label for="cust-email">Email Address</label>
+              <input type="email" id="cust-email" placeholder="ramesh@example.com">
+            </div>
+          </div>
+        </div>
+
+        <!-- Delivery Address -->
+        <div class="form-section">
+          <h4 class="form-section-title">2. Delivery Address</h4>
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="cust-address">Flat / House No., Building, Street *</label>
+              <textarea id="cust-address" required rows="2" placeholder="Flat 402, Green Valley Apartments, 12th Main"></textarea>
+            </div>
+            <div class="form-group">
+              <label for="cust-city">City *</label>
+              <input type="text" id="cust-city" required value="Bengaluru">
+            </div>
+            <div class="form-group">
+              <label for="cust-pincode">Pincode *</label>
+              <input type="text" id="cust-pincode" required pattern="[0-9]{6}" placeholder="560001">
+            </div>
+            <div class="form-group full-width">
+              <label for="cust-notes">Delivery Instructions (Optional)</label>
+              <input type="text" id="cust-notes" placeholder="e.g. Leave with security or ring doorbell">
+            </div>
+          </div>
+        </div>
+
+        <!-- Payment Method -->
+        <div class="form-section">
+          <h4 class="form-section-title">3. Payment Option</h4>
+          <div class="payment-options-grid">
+            <label class="payment-card selected">
+              <input type="radio" name="payment_method" value="Cash on Delivery (COD)" checked>
+              <div class="pay-info">
+                <span class="pay-icon">💵</span>
+                <div>
+                  <strong>Cash on Delivery (COD)</strong>
+                  <p>Pay cash or UPI scanner upon delivery</p>
+                </div>
+              </div>
+            </label>
+            <label class="payment-card">
+              <input type="radio" name="payment_method" value="UPI / QR Code">
+              <div class="pay-info">
+                <span class="pay-icon">📱</span>
+                <div>
+                  <strong>UPI / QR Scan</strong>
+                  <p>Google Pay, PhonePe, Paytm</p>
+                </div>
+              </div>
+            </label>
+            <label class="payment-card">
+              <input type="radio" name="payment_method" value="Credit/Debit Card">
+              <div class="pay-info">
+                <span class="pay-icon">💳</span>
+                <div>
+                  <strong>Credit / Debit Card</strong>
+                  <p>Visa, MasterCard, RuPay</p>
+                </div>
+              </div>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Review Summary in Modal -->
+      <div class="modal-order-summary">
+        <div class="summary-line">
+          <span>Items in Order:</span>
+          <strong id="modal-item-count">0 items</strong>
+        </div>
+        <div class="summary-line">
+          <span>Grand Total to Pay:</span>
+          <strong class="total-highlight" id="modal-grand-total">₹0.00</strong>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="secondary-btn" id="cancel-checkout-btn">Back to Cart</button>
+        <button type="submit" class="submit-order-btn" id="place-order-btn">
+          <span>Confirm & Place Order</span>
+          <span class="btn-spinner" id="btn-spinner" style="display:none;">⏳</span>
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Order Success Confirmation Modal -->
+  <div class="modal-backdrop" id="success-backdrop"></div>
+  <div class="success-modal" id="success-modal" role="dialog" aria-modal="true">
+    <div class="success-icon-wrap">
+      <div class="success-icon">✅</div>
+    </div>
+    <h2>Order Placed Successfully!</h2>
+    <p class="success-subtitle">Thank you for shopping with FreshMart. Your groceries are being packed from the nearest farm warehouse.</p>
+
+    <div class="order-receipt-card" id="order-receipt">
+      <div class="receipt-row">
+        <span>Order Number:</span>
+        <strong id="receipt-order-id">#FM-1001</strong>
+      </div>
+      <div class="receipt-row">
+        <span>Estimated Delivery:</span>
+        <strong class="delivery-time">⚡ 30-45 minutes</strong>
+      </div>
+      <div class="receipt-row">
+        <span>Customer Name:</span>
+        <span id="receipt-customer-name">Ramesh Kumar</span>
+      </div>
+      <div class="receipt-row">
+        <span>Delivery Address:</span>
+        <span id="receipt-address">Bengaluru</span>
+      </div>
+      <div class="receipt-row">
+        <span>Payment Method:</span>
+        <span id="receipt-payment">Cash on Delivery</span>
+      </div>
+      <div class="receipt-divider"></div>
+      <div class="receipt-row total">
+        <span>Total Amount:</span>
+        <strong id="receipt-total">₹0.00</strong>
+      </div>
+    </div>
+
+    <div class="success-actions">
+      <button class="primary-btn" id="continue-shopping-btn" onclick="closeSuccessModal()">Continue Shopping</button>
+    </div>
+  </div>
+
+  <!-- Reports & Analytics Modal (Python FastAPI Service Interface) -->
+  <div class="modal-backdrop" id="reports-backdrop"></div>
+  <div class="reports-modal" id="reports-modal" role="dialog">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <h3>📊 FreshMart Business Reports</h3>
+        <span class="modal-subtitle">Live analytics generated from PostgreSQL database</span>
+      </div>
+      <button class="close-modal-btn" id="close-reports-btn">✕</button>
+    </div>
+    <div class="reports-body" id="reports-body">
+      <div class="reports-toolbar">
+        <button class="tab-btn active" onclick="loadSalesReport()">Sales Summary</button>
+        <button class="tab-btn" onclick="loadStockReport()">Stock & Inventory</button>
+        <button class="tab-btn" onclick="loadRecentOrdersReport()">Recent Orders</button>
+      </div>
+      <div class="reports-content-area" id="reports-content-area">
+        <div class="reports-loading">Fetching business analytics from database...</div>
+      </div>
+    </div>
+  <!-- Location Selector Modal -->
+  <div class="modal-backdrop" id="location-backdrop"></div>
+  <div class="location-modal" id="location-modal" role="dialog" aria-modal="true">
+    <div class="modal-header">
+      <div class="modal-title-group">
+        <h3>📍 Select Delivery Location</h3>
+        <span class="modal-subtitle">Choose your city for 30-minute express grocery delivery</span>
+      </div>
+      <button class="close-modal-btn" id="close-location-btn">✕</button>
+    </div>
+    <div class="location-modal-body">
+      <div class="pincode-search-row">
+        <input type="text" id="pincode-input" placeholder="Enter 6-digit Pincode (e.g. 560001)" maxlength="6">
+        <button id="apply-pincode-btn" class="primary-btn">Apply</button>
+      </div>
+      <div id="pincode-msg" style="margin-top: 6px; font-size: 0.85rem; font-weight: 600;"></div>
+      <h4 style="margin: 18px 0 12px; font-size: 0.88rem; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px;">Express Delivery Hubs</h4>
+      <div class="cities-grid" id="cities-grid">
+        <button class="city-btn active" data-city="Bengaluru" data-pin="560001" data-time="⚡ 25-30 mins">
+          <span class="city-icon">🏙️</span>
+          <div class="city-info">
+            <strong>Bengaluru</strong>
+            <small>⚡ 25-30 mins</small>
+          </div>
+        </button>
+        <button class="city-btn" data-city="Mumbai" data-pin="400001" data-time="⚡ 30-35 mins">
+          <span class="city-icon">🌊</span>
+          <div class="city-info">
+            <strong>Mumbai</strong>
+            <small>⚡ 30-35 mins</small>
+          </div>
+        </button>
+        <button class="city-btn" data-city="Delhi NCR" data-pin="110001" data-time="⚡ 20-30 mins">
+          <span class="city-icon">🏛️</span>
+          <div class="city-info">
+            <strong>Delhi NCR</strong>
+            <small>⚡ 20-30 mins</small>
+          </div>
+        </button>
+        <button class="city-btn" data-city="Hyderabad" data-pin="500001" data-time="⚡ 30-40 mins">
+          <span class="city-icon">🕌</span>
+          <div class="city-info">
+            <strong>Hyderabad</strong>
+            <small>⚡ 30-40 mins</small>
+          </div>
+        </button>
+        <button class="city-btn" data-city="Chennai" data-pin="600001" data-time="⚡ 25-35 mins">
+          <span class="city-icon">🌴</span>
+          <div class="city-info">
+            <strong>Chennai</strong>
+            <small>⚡ 25-35 mins</small>
+          </div>
+        </button>
+        <button class="city-btn" data-city="Pune" data-pin="411001" data-time="⚡ 30-40 mins">
+          <span class="city-icon">⛰️</span>
+          <div class="city-info">
+            <strong>Pune</strong>
+            <small>⚡ 30-40 mins</small>
+          </div>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Quick View Modal -->
+  <div class="modal-backdrop" id="quickview-backdrop"></div>
+  <div class="quickview-modal" id="quickview-modal" role="dialog" aria-modal="true">
+    <button class="close-modal-btn" id="close-quickview-btn">✕</button>
+    <div class="quickview-content" id="quickview-content">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </div>
+
+  <!-- Floating Quick Cart Bar (Mobile & Desktop) -->
+  <div class="floating-cart-bar" id="floating-cart-bar" style="display:none;" onclick="openCart()">
+    <div class="floating-cart-content">
+      <div class="floating-cart-left">
+        <span class="floating-cart-icon">🛒</span>
+        <div class="floating-cart-details">
+          <strong id="floating-cart-items">0 items</strong>
+          <span class="floating-cart-sep">•</span>
+          <span class="floating-cart-total" id="floating-cart-total">₹0.00</span>
+        </div>
+      </div>
+      <button class="floating-cart-btn" aria-label="Open cart">View Basket →</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Footer -->
+  <footer class="main-footer">
+    <div class="section-container footer-content">
+      <div class="footer-col">
+        <div class="footer-logo">🌿 Fresh<span>Mart</span></div>
+        <p>India's trusted online grocery platform delivering fresh vegetables, organic fruits, daily dairy, and staples right to your kitchen.</p>
+        <p class="copyright">© 2026 FreshMart India Pvt. Ltd. All rights reserved.</p>
+      </div>
+      <div class="footer-col">
+        <h5>Popular Categories</h5>
+        <ul>
+          <li><a href="#" onclick="filterByCategory('Fruits & Vegetables')">Fruits & Vegetables</a></li>
+          <li><a href="#" onclick="filterByCategory('Dairy & Breakfast')">Dairy & Breakfast</a></li>
+          <li><a href="#" onclick="filterByCategory('Staples & Grains')">Staples & Grains</a></li>
+          <li><a href="#" onclick="filterByCategory('Spices & Oils')">Spices & Oils</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h5>Full-Stack Architecture</h5>
+        <ul class="tech-stack-list">
+          <li><strong>Frontend:</strong> HTML5, CSS3, Vanilla JavaScript</li>
+          <li><strong>Backend:</strong> Node.js, Express</li>
+          <li><strong>Database:</strong> PostgreSQL (pg driver)</li>
+          <li><strong>Reporting:</strong> Python, FastAPI, Uvicorn</li>
+        </ul>
+      </div>
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

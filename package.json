@@ -1,0 +1,26 @@
+{
+  "name": "freshmart-grocery-platform",
+  "version": "1.0.0",
+  "description": "FreshMart Full-Stack Grocery Shopping Platform",
+  "main": "node-backend/server.js",
+  "scripts": {
+    "postinstall": "cd node-backend && npm install",
+    "build": "cd node-backend && npm install",
+    "start": "cd node-backend && node scripts/setup-db.js && node server.js",
+    "dev": "cd node-backend && npm run dev",
+    "backup": "cd node-backend && npm run backup"
+  },
+  "keywords": [
+    "freshmart",
+    "grocery",
+    "ecommerce",
+    "render",
+    "nodejs",
+    "postgresql"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "author": "FreshMart Team",
+  "license": "ISC"
+}
